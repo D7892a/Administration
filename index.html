@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>وصلني بطريقك | مركز العمليات والتحكم الإداري الفائق ⚡</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900;950&display=swap');
+
+    :root {
+      --bg-base: #030712;
+      --surface-glass: rgba(11, 19, 36, 0.72);
+      --card-glass: rgba(15, 27, 48, 0.62);
+      --card-glass-hover: rgba(22, 38, 68, 0.78);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-glow-cyan: rgba(34, 211, 238, 0.45);
+      --border-glow-purple: rgba(168, 85, 247, 0.45);
+      
+      --cyan: #22d3ee;
+      --violet: #8b5cf6;
+      --pink: #ec4899;
+      --primary: #1557ff;
+      --primary-bright: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --txt: #f8fafc;
+      --muted: #8496b3;
+      
+      --sidebar-w: 285px;
+      --grad-primary: linear-gradient(135deg, #1557ff 0%, #8b5cf6 50%, #ec4899 100%);
+      --grad-cyan: linear-gradient(135deg, #06b6d4, #3b82f6);
+      --grad-danger: linear-gradient(135deg, #ef4444, #991b1b);
+      --grad-success: linear-gradient(135deg, #10b981, #047857);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-base);
+      color: var(--txt);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* تأثيرات خلفية سايبر وموجات إضاءة نيون */
+    .cyber-ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(21, 87, 255, 0.22), transparent 42%),
+        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.16), transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.08), transparent 55%),
+        radial-gradient(circle at 80% 10%, rgba(139, 92, 246, 0.18), transparent 40%);
+      animation: ambientPulse 14s ease-in-out infinite alternate;
+    }
+    @keyframes ambientPulse {
+      0% { transform: scale(1); opacity: 0.85; }
+      100% { transform: scale(1.04); opacity: 1; }
+    }
+
+    /* القائمة الجانبية الزجاجية */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: rgba(8, 14, 28, 0.88);
+      border-left: 1px solid var(--border-glass);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 1500;
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.55);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .brand-box {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    .brand-orb {
+      width: 48px;
+      height: 48px;
+      background: var(--grad-primary);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .brand-txt h3 {
+      font-size: 16.5px;
+      font-weight: 950;
+      background: linear-gradient(135deg, #fff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-txt span {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: 0.3px;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.22s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      transform: translateX(-3px);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(21, 87, 255, 0.25));
+      border: 1px solid var(--border-glow-cyan);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(21, 87, 255, 0.25);
+    }
+
+    .pill-badge {
+      margin-right: auto;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 950;
+      color: #fff;
+    }
+    .badge-red { background: var(--danger); box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4); }
+    .badge-amber { background: var(--warning); color: #000; font-weight: 900; }
+    .badge-live {
+      background: var(--success);
+      box-shadow: 0 0 14px var(--success);
+      animation: pulseBlink 1.4s infinite;
+    }
+    @keyframes pulseBlink { 0%,100%{ opacity: 1; transform: scale(1); } 50%{ opacity: 0.4; transform: scale(0.92); } }
+
+    /* مساحة العرض المركزية */
+    .viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      min-width: 0;
+      z-index: 10;
+    }
+
+    .header-bar {
+      background: rgba(7, 13, 26, 0.84);
+      border-bottom: 1px solid var(--border-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-mobile {
+      display: none;
+      background: var(--card-glass);
+      border: 1px solid var(--border-glass);
+      color: #fff;
+      font-size: 20px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .screen {
+      padding: 24px 28px;
+      display: none;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .screen.active {
+      display: flex;
+      animation: smoothFade 0.28s ease;
+    }
+    @keyframes smoothFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* كروت زجاجية فائقة الفخامة */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .stat-card {
+      background: var(--card-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: 26px;
+      padding: 24px 20px;
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      background: var(--card-glass-hover);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-3px);
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4.5px;
+      height: 100%;
+      background: var(--cyan);
+      box-shadow: 0 0 14px var(--cyan);
+    }
+    .stat-card.c-red::before { background: var(--danger); box-shadow: 0 0 14px var(--danger); }
+    .stat-card.c-green::before { background: var(--success); box-shadow: 0 0 14px var(--success); }
+    .stat-card.c-purple::before { background: var(--violet); box-shadow: 0 0 14px var(--violet); }
+    .stat-card.c-amber::before { background: var(--warning); box-shadow: 0 0 14px var(--warning); }
+
+    .stat-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-val {
+      font-size: 27px;
+      font-weight: 950;
+      letter-spacing: -0.5px;
+    }
+
+    /* حاويات الجداول والخرائط */
+    .panel-glass {
+      background: var(--card-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: 28px;
+      overflow: hidden;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .panel-header {
+      padding: 18px 24px;
+      background: rgba(14, 24, 44, 0.65);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-header h3 {
+      font-size: 15px;
+      font-weight: 950;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      max-height: 520px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 780px;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    th {
+      background: rgba(8, 15, 30, 0.96);
+      padding: 15px 22px;
+      font-size: 12px;
+      font-weight: 950;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border-glass);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    td {
+      padding: 16px 22px;
+      font-size: 13.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.028);
+    }
+
+    #commandMap {
+      width: 100%;
+      height: 500px;
+      background: #040812;
+    }
+
+    /* كروت الكباتن الفخمة */
+    .caps-deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 20px;
+    }
+
+    .cap-card {
+      background: var(--card-glass);
+      border: 1.5px solid var(--border-glass);
+      border-radius: 26px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all 0.22s;
+    }
+    .cap-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-2px);
+    }
+    .cap-card.debt-danger {
+      border-color: rgba(239, 68, 68, 0.7);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.12) 0%, var(--card-glass) 100%);
+    }
+
+    .cap-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      object-fit: cover;
+      border: 2px solid var(--cyan);
+      background: #0f172a;
+    }
+
+    .debt-badge-row {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 950;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* حقول الإدخال والأزرار الزجاجية */
+    .inp-field {
+      width: 100%;
+      padding: 13px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--border-glass);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .inp-field:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.16);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 16px;
+      font-size: 12.5px;
+      font-weight: 900;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-grad { background: var(--grad-cyan); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35); }
+    .btn-danger { background: var(--grad-danger); box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35); }
+    .btn-success { background: var(--grad-success); box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); }
+    .btn-ghost { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-glass); color: #cbd5e1; }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+    /* النوافذ المنبثقة المودال */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.88);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: rgba(13, 22, 42, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 30px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75);
+    }
+
+    @media (max-width: 960px) {
+      .sidebar { position: fixed; inset-block: 0; right: calc(var(--sidebar-w) * -1); }
+      .sidebar.active { transform: translateX(calc(var(--sidebar-w) * -1)); }
+      .btn-mobile { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cyber-ambient"></div>
+
+  <!-- القائمة الجانبية الفخمة -->
+  <aside class="sidebar" id="mainSidebar">
+    <div class="brand-box">
+      <div class="brand-orb">
+    <img src="logo.png" alt="وصلني بطريقك" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">
+</div>
+      <div class="brand-txt">
+        <h3>وصلني بطريقك</h3>
+        <span>OPERATIONS COMMAND</span>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchView('secDashboard', this)">
+        <span>📊</span> <span>المؤشرات والأرباح</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secLiveDispatch', this)">
+        <span>🔴</span> <span>الرحلات المباشرة</span>
+        <span class="pill-badge badge-live" id="badgeActiveTripsCount">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secHeatmapView', this)">
+        <span>🔥</span> <span>خريطة الكثافة والطلب</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCancelsLog', this)">
+        <span>🚫</span> <span>سجل الإلغاءات والأسباب</span>
+        <span class="pill-badge badge-red" id="badgeCancelCount">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCaptainsPenalties', this)">
+        <span>🚗</span> <span>مخالفات الكباتن (التخطي)</span>
+        <span class="pill-badge badge-red" id="badgeCapSkips">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCustomersPenalties', this)">
+        <span>👤</span> <span>مخالفات الزبائن (الإلغاء)</span>
+        <span class="pill-badge badge-red" id="badgeCustCancels">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secFinanceApprovals', this)">
+        <span>💳</span> <span>طلبات الشحن والتسديد</span>
+        <span class="pill-badge badge-amber" id="badgeTopupsCount">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secDisputesHQ', this)">
+        <span>🚨</span> <span>الشكاوى والبلاغات الطارئة</span>
+        <span class="pill-badge badge-red" id="badgeDisputesCount">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCaptainsHQ', this)">
+        <span>🪪</span> <span>إدارة الكباتن وقفل الديون</span>
+        <span class="pill-badge badge-amber" id="badgePendingCaps">0</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCustomersHQ', this)">
+        <span>👥</span> <span>قاعدة الزبائن المعتمدة</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secCouponsManager', this)">
+        <span>🎟️</span> <span>كودات الخصم والعروض</span>
+      </li>
+      <li class="nav-item" onclick="switchView('secPricingEngine', this)">
+        <span>⚙️</span> <span>خوارزمية التسعير والتغطية</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- مساحة العرض المركزية -->
+  <main class="viewport">
+    <header class="header-bar">
+      <div class="header-left">
+        <button class="btn-mobile" onclick="toggleSidebarMenu()">☰</button>
+        <h2 style="font-size: 16.5px; font-weight: 950;" id="txtHeaderTitle">المؤشرات والأرباح</h2>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 12px; font-weight: 900; color: var(--success); display: flex; align-items: center; gap: 6px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success);"></span>
+          السيرفر متصل لحظياً
+        </span>
+        <button class="btn btn-ghost" onclick="exportDataExcel()">📊 تصدير Excel</button>
+        <button class="btn btn-grad" onclick="location.reload()">تحديث 🔄</button>
+      </div>
+    </header>
+
+    <!-- 1. شاشة المؤشرات والأرباح -->
+    <section class="screen active" id="secDashboard">
+      <div class="grid-stats">
+        <div class="stat-card">
+          <div class="stat-title"><span>💰</span> أرباح عمولة المنصة (10%)</div>
+          <div class="stat-val" id="lblPlatformRev" style="color: var(--cyan);">0 د.ع</div>
+        </div>
+        <div class="stat-card c-green">
+          <div class="stat-title"><span>🚕</span> رحلات جارية ومباشرة الآن</div>
+          <div class="stat-val" id="lblLiveTripsCount" style="color: var(--success);">0</div>
+        </div>
+        <div class="stat-card c-red">
+          <div class="stat-title"><span>🔒</span> كباتن مقيدين (+10,000 د.ع ديون)</div>
+          <div class="stat-val" id="lblLockedDebtsCount" style="color: var(--danger);">0</div>
+        </div>
+        <div class="stat-card c-purple">
+          <div class="stat-title"><span>🚫</span> إجمالي الرحلات الملغاة</div>
+          <div class="stat-val" id="lblCancelsCount" style="color: #c084fc;">0</div>
+        </div>
+        <div class="stat-card c-amber">
+          <div class="stat-title"><span>⏳</span> كباتن بانتظار الاعتماد</div>
+          <div class="stat-val" id="lblPendingCapsCount" style="color: var(--warning);">0</div>
+        </div>
+      </div>
+
+      <!-- المشاوير المكتملة حديثاً -->
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>🏁</span> أحدث المشاوير المسجلة بالمنظومة</h3>
+          <small style="color: var(--muted)">تحديث مباشر لحظة بلحظة</small>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>الكود</th>
+                <th>الكابتن</th>
+                <th>الزبون</th>
+                <th>المسار</th>
+                <th>المسافة</th>
+                <th>الأجرة</th>
+                <th>عمولة المنصة</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="allTripsTbody">
+              <tr><td colspan="8" style="text-align: center; color: var(--muted);">جاري جلب السجلات...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. شاشة الرحلات المباشرة الحية -->
+    <section class="screen" id="secLiveDispatch">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>🔴</span> المشاوير الجارية في هذه اللحظة (غرفة العمليات الحية)</h3>
+          <span class="pill-badge badge-live" id="tagLiveDispatchCount">0 رحلات نشطة</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>كود المشوار</th>
+                <th>الكابتن المنفذ</th>
+                <th>الزبون</th>
+                <th>مسار الرحلة (من ← إلى)</th>
+                <th>الأجرة المستحقة</th>
+                <th>حالة المشوار</th>
+                <th>إجراءات الطوارئ</th>
+              </tr>
+            </thead>
+            <tbody id="liveTripsTbody">
+              <tr><td colspan="7" style="text-align: center; color: var(--muted);">لا توجد مشاوير جارية في هذه اللحظة.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. الخريطة الحرارية (Heatmap) المجانية والسريعة -->
+    <section class="screen" id="secHeatmapView">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <div>
+            <h3><span>🔥</span> الخريطة الحرارية لكثافة طلبات التاكسي (Heatmap)</h3>
+            <p style="font-size: 11.5px; color: var(--muted); margin-top: 3px;">تحديد بؤر الطلب العالي في المدينة لتوجيه الكباتن نحوها فورياً</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; font-weight: 800; color: var(--muted);">نطاق الخدمة:</span>
+            <input type="number" id="inCoverageRadiusKm" value="12" style="width: 60px; background: rgba(255,255,255,0.07); border: 1px solid var(--border-glass); color: #fff; padding: 6px; border-radius: 12px; text-align: center; font-weight: 900;">
+            <span style="font-size: 11px;">كم</span>
+            <button class="btn btn-grad" style="padding: 7px 14px;" onclick="saveCoverageRadius()">حفظ</button>
+          </div>
+        </div>
+        <div id="commandMap"></div>
+      </div>
+    </section>
+
+    <!-- 4. سجل الإلغاءات التفصيلي مع السبب -->
+    <section class="screen" id="secCancelsLog">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <div>
+            <h3><span>🚫</span> تقرير وسجل الإلغاءات التفصيلي مع بيان المتسبب والسبب</h3>
+            <p style="font-size: 11.5px; color: var(--muted); margin-top: 3px;">توثيق مباشر وصارم لمنع التلاعب وكشف مبررات الإلغاء</p>
+          </div>
+          <span class="pill-badge badge-red" id="tagCancelHeaderCount">0 ملغاة</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>رقم الرحلة</th>
+                <th>الطرف المتسبب</th>
+                <th>اسم الطرف</th>
+                <th>رقم الهاتف</th>
+                <th>السبب المصرح به</th>
+                <th>التاريخ والوقت</th>
+              </tr>
+            </thead>
+            <tbody id="cancelsLogTbody">
+              <tr><td colspan="6" style="text-align: center; color: var(--muted);">جاري فحص السجلات...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. مخالفات الكباتن (التخطي المتكرر) -->
+    <section class="screen" id="secCaptainsPenalties">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>🚗</span> الكباتن المتجاوزون لحد التخطي (10 مرات فأكثر)</h3>
+          <small style="color: var(--muted)">تطبيق عقوبات الحظر أو الغرامات على الحسابات المخالفة</small>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>اسم الكابتن</th>
+                <th>الهاتف</th>
+                <th>مرات التخطي</th>
+                <th>حالة الحساب</th>
+                <th>الإجراء الإداري</th>
+              </tr>
+            </thead>
+            <tbody id="capsPenaltiesTbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--muted);">لا توجد مخالفات مسجلة حالياً.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. مخالفات الزبائن (الإلغاء المتكرر) -->
+    <section class="screen" id="secCustomersPenalties">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>👤</span> الزبائن المتجاوزون لحد الإلغاء (5 مرات فأكثر)</h3>
+          <small style="color: var(--muted)">فرض إنذار أولي أو حظر مؤقت (5 ساعات) أو غرامة مالية</small>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>اسم الزبون</th>
+                <th>الهاتف</th>
+                <th>مرات الإلغاء</th>
+                <th>حالة الحساب</th>
+                <th>الإجراء الإداري</th>
+              </tr>
+            </thead>
+            <tbody id="custPenaltiesTbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--muted);">لا يوجد زبائن مخالفين حالياً.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. طلبات الشحن والتسديد (ماستركارد / زين كاش) -->
+    <section class="screen" id="secFinanceApprovals">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>💳</span> إشعارات تحويلات وشحن المحافظ وتسديد الديون</h3>
+          <span class="pill-badge badge-amber" id="tagFinancePendingCount">0 طلبات معلقة</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>الكابتن</th>
+                <th>رقم الهاتف</th>
+                <th>المبلغ المحوّل</th>
+                <th>نوع التحويل</th>
+                <th>صورة الوصل</th>
+                <th>القرار والتنفيذ</th>
+              </tr>
+            </thead>
+            <tbody id="topupsTbody">
+              <tr><td colspan="6" style="text-align: center; color: var(--muted);">لا توجد طلبات شحن معلقة حالياً.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. الشكاوى والبلاغات الطارئة -->
+    <section class="screen" id="secDisputesHQ">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>🚨</span> مركز البلاغات وحالات الطوارئ (SOS)</h3>
+          <span class="pill-badge badge-red" id="tagDisputesHeaderCount">0 بلاغات</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>المبلّغ</th>
+                <th>الطرف المشتكى عليه</th>
+                <th>نوع البلاغ</th>
+                <th>التفاصيل</th>
+                <th>رقم المشوار</th>
+                <th>الإجراءات الفورية</th>
+              </tr>
+            </thead>
+            <tbody id="disputesTbody">
+              <tr><td colspan="6" style="text-align: center; color: var(--muted);">لا توجد شكاوى أو بلاغات معلقة حالياً.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. إدارة الكباتن وتدقيق الوثائق الـ 8 وقفل الديون -->
+    <section class="screen" id="secCaptainsHQ">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-ghost" onclick="filterCaptains('all')">عرض الكل</button>
+        <button class="btn btn-danger" onclick="filterCaptains('debt_locked')">🔒 متجاوزين حد الديون (+10K)</button>
+        <button class="btn btn-ghost" onclick="filterCaptains('pending_approval')">⏳ بانتظار التدقيق والاعتماد</button>
+      </div>
+      <div class="caps-deck" id="captainsDeckGrid"></div>
+    </section>
+
+    <!-- 10. قاعدة الزبائن -->
+    <section class="screen" id="secCustomersHQ">
+      <div class="panel-glass">
+        <div class="panel-header">
+          <h3><span>👥</span> قاعدة بيانات الركاب والعملاء المعتمدة</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>الهاتف</th>
+                <th>إجمالي الرحلات</th>
+                <th>المسافة التراكمية</th>
+                <th>إهداء كود VIP</th>
+              </tr>
+            </thead>
+            <tbody id="usersTbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--muted);">جاري تحميل الزبائن...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. كودات الخصم والعروض -->
+    <section class="screen" id="secCouponsManager">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <div class="panel-glass" style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+          <h3 style="font-size: 15px; font-weight: 950;">إصدار وتفعيل كود خصم جديد 🎟️</h3>
+          <input type="text" id="txtCouponCode" placeholder="رمز الكود (مثال: WASLNI20)" class="inp-field" style="text-transform: uppercase;">
+          <input type="number" id="txtCouponDiscount" value="15" placeholder="نسبة الخصم %" class="inp-field">
+          
+          <select id="selectCouponTarget" class="inp-field" style="background:#091224;" onchange="onCouponScopeChange(this.value)">
+            <option value="all">كود عام (متاح لجميع الركاب)</option>
+            <option value="targeted">مخصص لرقم هاتف زبون محدد</option>
+          </select>
+
+          <div id="targetPhoneGroup" style="display: none;">
+            <input type="tel" id="txtTargetPhone" placeholder="رقم هاتف الزبون 07XXXXXXXXX" class="inp-field">
+          </div>
+
+          <button class="btn btn-grad" style="padding: 13px;" onclick="deployCouponCode()">✓ نشر وتفعيل الكود فوراً</button>
+        </div>
+
+        <div class="panel-glass">
+          <div class="panel-header"><h4 style="font-size: 14px; font-weight: 950;">الكودات الفعالة حالياً</h4></div>
+          <div class="table-responsive">
+            <table>
+              <thead><tr><th>الكود</th><th>الخصم</th><th>الهدف</th><th>إلغاء</th></tr></thead>
+              <tbody id="couponsTbody"><tr><td colspan="4" style="text-align: center;">لا توجد كودات.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. خوارزمية التسعير ونطاق التغطية -->
+    <section class="screen" id="secPricingEngine">
+      <div class="panel-glass" style="max-width: 520px; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 16px; font-weight: 950;">خوارزمية حساب الأجرة ونسب المنصة ⚙️</h3>
+        
+        <div>
+          <label style="font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; font-weight: bold;">نسبة اقتطاع المنصة (%):</label>
+          <input type="number" id="inCommissionPct" value="10" class="inp-field">
+        </div>
+        
+        <div>
+          <label style="font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; font-weight: bold;">فتح العداد الأساسي (د.ع):</label>
+          <input type="number" id="inBasePrice" value="1500" class="inp-field">
+        </div>
+        
+        <div>
+          <label style="font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; font-weight: bold;">سعر الكيلومتر الواحد (د.ع):</label>
+          <input type="number" id="inKmRate" value="500" class="inp-field">
+        </div>
+
+        <button class="btn btn-grad" style="padding: 14px; margin-top: 6px;" onclick="savePricingAlgorithm()">
+          حفظ وتطبيق الخوارزمية فوراً ⚡
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- نافذة تدقيق المستمسكات الـ 4 كاملة (8 صور بوجه وظهر) -->
+  <div class="modal-overlay" id="inspectorModal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 950; color: var(--cyan);">تدقيق وثائق الكابتن الـ 4 بوجه وظهر (8 صور رسمية)</h3>
+        <button style="background: none; border: none; font-size: 24px; color: var(--muted); cursor: pointer;" onclick="closeModalById('inspectorModal')">✕</button>
+      </div>
+
+      <div id="inspectorDetails" style="margin: 14px 0; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 16px; font-size: 13px; line-height: 1.6; border: 1px solid var(--border-glass);"></div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 14px 0;">
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--cyan);">سنوية (وجه)</b>
+          <img id="vSanawaFront" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--cyan);">سنوية (ظهر)</b>
+          <img id="vSanawaBack" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--warning);">الإجازة (وجه)</b>
+          <img id="vLicenseFront" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--warning);">الإجازة (ظهر)</b>
+          <img id="vLicenseBack" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--success);">الهوية (وجه)</b>
+          <img id="vIdFront" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--success);">الهوية (ظهر)</b>
+          <img id="vIdBack" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--pink);">السكن (وجه)</b>
+          <img id="vResFront" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+        <div style="text-align: center; border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.02);">
+          <b style="font-size: 11px; color:var(--pink);">السكن (ظهر)</b>
+          <img id="vResBack" style="width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 5px; cursor: pointer;" onclick="zoomImg(this.src)">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button class="btn btn-success" style="flex: 2; padding: 13px;" onclick="approveCaptainByModal()">✓ اعتماد وتفعيل الكابتن فوراً</button>
+        <button class="btn btn-danger" style="flex: 1; padding: 13px;" onclick="freezeCaptainByModal()">✕ تجميد الحساب</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة تطبيق العقوبات الإدارية على الزبائن أو الكباتن -->
+  <div class="modal-overlay" id="penaltyActionModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <h3 id="txtPenaltyTargetTitle" style="font-size: 16px; font-weight: 950; color: var(--danger);">فرض عقوبة إدارية رادعة</h3>
+        <button style="background: none; border: none; font-size: 24px; color: var(--muted); cursor: pointer;" onclick="closeModalById('penaltyActionModal')">✕</button>
+      </div>
+
+      <div style="margin: 16px 0; display: flex; flex-direction: column; gap: 14px;">
+        <label style="font-size: 12.5px; color: var(--muted); font-weight: bold;">نوع العقوبة المقررة:</label>
+        <select id="selectPenaltyType" class="inp-field" style="background:#091224;" onchange="onPenaltyTypeChange(this.value)">
+          <option value="warning">توجيه إنذار رسمي أول</option>
+          <option value="ban_5h">حظر مؤقت لمدة 5 ساعات</option>
+          <option value="ban_24h">حظر مؤقت لمدة 24 ساعة</option>
+          <option value="fine">فرض غرامة مالية تسجل بذمته</option>
+          <option value="permanent_ban">حظر دائم وإلغاء الحساب</option>
+        </select>
+
+        <div id="penaltyFineAmountBox" style="display: none;">
+          <label style="font-size: 12.5px; color: var(--muted); font-weight: bold;">مبلغ الغرامة (د.ع):</label>
+          <input type="number" id="inPenaltyFineAmount" placeholder="مثال: 5000" class="inp-field">
+        </div>
+
+        <label style="font-size: 12.5px; color: var(--muted); font-weight: bold;">سبب ومبرر العقوبة (سيظهر للمستخدم):</label>
+        <textarea id="txtPenaltyReason" placeholder="اكتب سبب فرض العقوبة بوضوح..." class="inp-field" style="height: 90px; resize: none;"></textarea>
+
+        <button class="btn btn-danger" style="padding: 14px; font-size: 13.5px; margin-top: 6px;" onclick="executePenaltyAction()">
+          تنفيذ وتطبيق العقوبة فوراً ⚡
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getFirestore, collection, doc, onSnapshot, updateDoc, setDoc, getDoc, getDocs, deleteDoc, query, where, addDoc, serverTimestamp, increment, runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOUbHXIDwnEslmhwb2f_Jo83XpmpLVzFY",
+      authDomain: "tixe-4d8ac.firebaseapp.com",
+      databaseURL: "https://tixe-4d8ac-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tixe-4d8ac",
+      storageBucket: "tixe-4d8ac.firebasestorage.app",
+      messagingSenderId: "1009320674344",
+      appId: "1:1009320674344:web:5b509fa96d12be29e1a11d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const defaultHQ = [31.0450, 46.2570];
+    let map = null;
+    let mapInitialized = false;
+    let coverageCircle = null;
+    let heatLayer = null;
+    let inspectedPhone = null;
+    let captainsCache = [];
+    let currentCapFilter = "all";
+    let exportTrips = [];
+    let activePenaltyContext = { role: null, phone: null, name: null };
+
+    // تهيئة الخريطة الحرارية (Heatmap) المجانية والسريعة
+    function initHeatMapLazy() {
+      if (mapInitialized) return;
+      map = L.map("commandMap", { zoomControl: false }).setView(defaultHQ, 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      mapInitialized = true;
+      drawCoverageCircle(Number(document.getElementById("inCoverageRadiusKm").value) || 12);
+      startHeatmapFeed();
+    }
+
+    function drawCoverageCircle(r) {
+      if (!map) return;
+      if (coverageCircle) map.removeLayer(coverageCircle);
+      coverageCircle = L.circle(defaultHQ, {
+        color: "#22d3ee", fillColor: "#22d3ee", fillOpacity: 0.06, radius: r * 1000, weight: 1.5, dashArray: "5, 6"
+      }).addTo(map);
+    }
+
+    window.toggleSidebarMenu = () => document.getElementById("mainSidebar").classList.toggle("active");
+
+    window.switchView = function(screenId, el) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+      el.classList.add("active");
+      document.getElementById("txtHeaderTitle").innerText = el.innerText.trim();
+
+      if (window.innerWidth <= 960) toggleSidebarMenu();
+
+      if (screenId === "secHeatmapView") {
+        initHeatMapLazy();
+        setTimeout(() => map && map.invalidateSize(), 150);
+      }
+    };
+
+    function startHeatmapFeed() {
+      onSnapshot(collection(db, "trips"), snap => {
+        const heatPoints = [];
+        snap.forEach(d => {
+          const t = d.data();
+          if (t.pickup?.lat && t.pickup?.lng) {
+            heatPoints.push([t.pickup.lat, t.pickup.lng, 0.75]);
+          }
+        });
+
+        if (heatLayer && map) map.removeLayer(heatLayer);
+        if (heatPoints.length && map) {
+          heatLayer = L.heatLayer(heatPoints, {
+            radius: 28,
+            blur: 18,
+            maxZoom: 17,
+            gradient: { 0.2: '#22d3ee', 0.5: '#facc15', 0.8: '#ff7100', 1.0: '#ef4444' }
+          }).addTo(map);
+        }
+      });
+    }
+
+    // 1. مراقبة الرحلات المباشرة الحية (غرفة العمليات المركزية)
+    onSnapshot(collection(db, "trips"), snap => {
+      const tbody = document.getElementById("liveTripsTbody");
+      const activeList = [];
+      let totalCancels = 0;
+      let totalCompletedRev = 0;
+      const allTripsRows = [];
+      exportTrips = [];
+
+      snap.forEach(d => {
+        const t = d.data();
+        t.id = d.id;
+        exportTrips.push(t);
+
+        if (["accepted", "arrived", "on_way"].includes(t.status)) {
+          activeList.push(t);
+        }
+        if (t.status === "cancelled") totalCancels++;
+        if (t.status === "completed") {
+          totalCompletedRev += (t.commissionCut || (Number(t.fare || 1500) * 0.10));
+        }
+
+        allTripsRows.push(t);
+      });
+
+      // الإحصائيات العلوية
+      document.getElementById("badgeActiveTripsCount").innerText = activeList.length;
+      document.getElementById("lblLiveTripsCount").innerText = activeList.length;
+      document.getElementById("tagLiveDispatchCount").innerText = `${activeList.length} رحلات نشطة`;
+      document.getElementById("lblCancelsCount").innerText = totalCancels;
+      document.getElementById("lblPlatformRev").innerText = `${Math.round(totalCompletedRev).toLocaleString()} د.ع`;
+
+      // جدول الرحلات المباشرة
+      if (!activeList.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--muted);">لا توجد رحلات جارية في هذه اللحظة.</td></tr>';
+      } else {
+        tbody.innerHTML = activeList.map(t => {
+          let statusText = '<span style="color:var(--cyan);">🧭 في الطريق للزبون</span>';
+          if (t.status === "arrived") statusText = '<span style="color:var(--warning);">📍 وصل لموقع الزبون</span>';
+          if (t.status === "on_way") statusText = '<span style="color:var(--success);">🚀 جارٍ نحو الهدف</span>';
+
+          return `<tr>
+            <td><code style="color:var(--cyan);">#${t.id.slice(0, 6)}</code></td>
+            <td><b>${t.captainName || 'كابتن'}</b><br><small style="color:var(--muted);">${t.captainPhone || ''}</small></td>
+            <td><b>${t.userName || 'الزبون'}</b><br><small style="color:var(--muted);">${t.userPhone || ''}</small></td>
+            <td>
+              <span style="color:var(--warning);">📍 ${t.pickup?.address || 'الانطلاق'}</span><br>
+              <span style="color:var(--cyan);">🏁 ${t.dropoff?.address || 'الوجهة'}</span>
+            </td>
+            <td><b style="color:var(--success); font-size:14px;">${Number(t.fare || 1500).toLocaleString()} د.ع</b></td>
+            <td><b>${statusText}</b></td>
+            <td>
+              <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="adminForceCancelTrip('${t.id}')">إلغاء قسري للطوارئ ✕</button>
+            </td>
+          </tr>`;
+        }).join("");
+      }
+
+      // جدول كل الرحلات في الداشبورد مرتب محلياً بدون قيود فهارس
+      allTripsRows.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      document.getElementById("allTripsTbody").innerHTML = allTripsRows.slice(0, 20).map(t => `
+        <tr>
+          <td><code style="color:var(--cyan);">#${t.id.slice(0, 5)}</code></td>
+          <td>${t.captainName || "--"}</td>
+          <td>${t.userName || "--"}</td>
+          <td>${t.pickup?.address || ""} ← ${t.dropoff?.address || ""}</td>
+          <td>${t.distanceKm || 0} كم</td>
+          <td><b>${(t.fare || 0).toLocaleString()} د.ع</b></td>
+          <td style="color:var(--success); font-weight:950;">+${(t.commissionCut || Math.round((t.fare||0)*0.10)).toLocaleString()} د.ع</td>
+          <td><span class="pill-badge" style="background:rgba(255,255,255,0.08);">${t.status}</span></td>
+        </tr>
+      `).join("") || '<tr><td colspan="8" style="text-align: center;">لا توجد رحلات مسجلة.</td></tr>';
+    });
+
+    window.adminForceCancelTrip = async tripId => {
+      if (!confirm("هل أنت متأكد من إلغاء هذه الرحلة قسرياً من لوحة الإدارة؟")) return;
+      await updateDoc(doc(db, "trips", tripId), {
+        status: "cancelled",
+        cancelledBy: "admin",
+        cancelReason: "إلغاء قسري من قبل غرفة عمليات الإدارة",
+        cancelledAt: serverTimestamp()
+      });
+      alert("✅ تم إلغاء الرحلة فوراً.");
+    };
+
+    // 2. سجل الإلغاءات التفصيلي مع بيان السبب
+    onSnapshot(collection(db, "trips"), snap => {
+      const tbody = document.getElementById("cancelsLogTbody");
+      const cancels = [];
+
+      snap.forEach(d => {
+        const t = d.data();
+        if (t.status === "cancelled") {
+          cancels.push({ id: d.id, ...t });
+        }
+      });
+
+      cancels.sort((a,b) => (b.cancelledAt?.seconds || b.createdAt?.seconds || 0) - (a.cancelledAt?.seconds || a.createdAt?.seconds || 0));
+      document.getElementById("badgeCancelCount").innerText = cancels.length;
+      document.getElementById("tagCancelHeaderCount").innerText = `${cancels.length} ملغاة`;
+
+      if (!cancels.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--muted);">لا توجد رحلات ملغاة مسجلة.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = cancels.map(t => {
+        const who = t.cancelledBy === 'captain' ? 'الكابتن' : (t.cancelledBy === 'admin' ? 'الإدارة' : 'الزبون');
+        const whoColor = t.cancelledBy === 'captain' ? 'var(--cyan)' : (t.cancelledBy === 'admin' ? 'var(--danger)' : 'var(--warning)');
+        const name = t.cancelledBy === 'captain' ? (t.captainName || 'كابتن') : (t.userName || 'زبون');
+        const phone = t.cancelledBy === 'captain' ? (t.captainPhone || '--') : (t.userPhone || '--');
+
+        return `<tr>
+          <td><code style="color:var(--muted);">#${t.id.slice(0,6)}</code></td>
+          <td><b style="color:${whoColor};">${who}</b></td>
+          <td>${name}</td>
+          <td>${phone}</td>
+          <td><span style="background:rgba(239,68,68,0.15); color:var(--danger); padding:4px 9px; border-radius:8px; font-weight:bold;">${t.cancelReason || 'إلغاء يدوي مباشر'}</span></td>
+          <td><small style="color:var(--muted);">${t.createdAt ? new Date(t.createdAt.seconds * 1000).toLocaleTimeString('ar-IQ') : '--'}</small></td>
+        </tr>`;
+      }).join("");
+    });
+
+    // 3. مخالفات الكباتن (التخطي المتكرر +10)
+    onSnapshot(collection(db, "captains"), snap => {
+      const tbody = document.getElementById("capsPenaltiesTbody");
+      let skipsViolators = 0;
+      let rows = '';
+
+      snap.forEach(d => {
+        const c = d.data();
+        const skips = c.skipCount || 0;
+        if (skips >= 10) {
+          skipsViolators++;
+          rows += `<tr>
+            <td><b>${c.name || 'كابتن'}</b></td>
+            <td><code>${d.id}</code></td>
+            <td><b style="color:var(--danger); font-size:15px;">${skips}</b> تخطي</td>
+            <td><span style="color:${c.penaltyStatus ? 'var(--danger)' : 'var(--success)'};">${c.penaltyStatus ? (c.penaltyReason || 'معاقب') : 'نشط'}</span></td>
+            <td>
+              <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="openPenaltyModal('captain', '${d.id}', '${c.name}')">معاقبة الكابتن ⚡</button>
+              <button class="btn btn-success" style="padding:4px 10px; font-size:11px;" onclick="forgiveAccountViolations('captain', '${d.id}')">تصفير السجل ✓</button>
+            </td>
+          </tr>`;
+        }
+      });
+
+      document.getElementById("badgeCapSkips").innerText = skipsViolators;
+      tbody.innerHTML = rows || '<tr><td colspan="5" style="text-align: center; color: var(--muted);">لا يوجد كباتن مفرطين في التخطي حالياً.</td></tr>';
+    });
+
+    // 4. مخالفات الزبائن (الإلغاء المتكرر +5)
+    onSnapshot(collection(db, "users"), snap => {
+      const tbody = document.getElementById("custPenaltiesTbody");
+      let cancelViolators = 0;
+      let rows = '';
+
+      snap.forEach(d => {
+        const u = d.data();
+        const cancels = u.cancelCount || 0;
+        if (cancels >= 5) {
+          cancelViolators++;
+          rows += `<tr>
+            <td><b>${u.name || 'زبون'}</b></td>
+            <td><code>${d.id}</code></td>
+            <td><b style="color:var(--danger); font-size:15px;">${cancels}</b> إلغاء</td>
+            <td><span style="color:${u.penaltyStatus ? 'var(--danger)' : 'var(--success)'};">${u.penaltyStatus ? (u.penaltyReason || 'معاقب') : 'نشط'}</span></td>
+            <td>
+              <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="openPenaltyModal('customer', '${d.id}', '${u.name}')">فرض عقوبة ⚡</button>
+              <button class="btn btn-success" style="padding:4px 10px; font-size:11px;" onclick="forgiveAccountViolations('customer', '${d.id}')">تصفير ومسامحة ✓</button>
+            </td>
+          </tr>`;
+        }
+      });
+
+      document.getElementById("badgeCustCancels").innerText = cancelViolators;
+      tbody.innerHTML = rows || '<tr><td colspan="5" style="text-align: center; color: var(--muted);">لا يوجد زبائن تجاوزوا حد الـ 5 إلغاءات.</td></tr>';
+    });
+
+    // دوال تطبيق العقوبات
+    window.openPenaltyModal = (role, phone, name) => {
+      activePenaltyContext = { role, phone, name };
+      document.getElementById("txtPenaltyTargetTitle").innerText = `فرض عقوبة على (${name}) - [${role === 'captain' ? 'كابتن' : 'زبون'}]`;
+      document.getElementById("penaltyActionModal").style.display = "flex";
+    };
+
+    window.closeModalById = id => document.getElementById(id).style.display = "none";
+
+    window.onPenaltyTypeChange = type => {
+      document.getElementById("penaltyFineAmountBox").style.display = type === "fine" ? "block" : "none";
+    };
+
+    window.executePenaltyAction = async () => {
+      const type = document.getElementById("selectPenaltyType").value;
+      const reason = document.getElementById("txtPenaltyReason").value.trim() || "تجاوز الحدود المسموحة لسياسة الاستخدام";
+      const fineAmount = Number(document.getElementById("inPenaltyFineAmount").value) || 5000;
+      const col = activePenaltyContext.role === 'captain' ? 'captains' : 'users';
+
+      const updatePayload = {
+        penaltyStatus: type,
+        penaltyReason: reason,
+        penalizedAt: serverTimestamp()
+      };
+
+      if (type === 'ban_5h') {
+        updatePayload.bannedUntil = Date.now() + (5 * 60 * 60 * 1000);
+        updatePayload.status = 'banned';
+      } else if (type === 'ban_24h') {
+        updatePayload.bannedUntil = Date.now() + (24 * 60 * 60 * 1000);
+        updatePayload.status = 'banned';
+      } else if (type === 'permanent_ban') {
+        updatePayload.status = 'banned';
+      } else if (type === 'fine') {
+        if (activePenaltyContext.role === 'captain') {
+          updatePayload.companyDebt = increment(fineAmount);
+        } else {
+          updatePayload.unpaidFine = fineAmount;
+        }
+      }
+
+      await updateDoc(doc(db, col, activePenaltyContext.phone), updatePayload);
+      closeModalById('penaltyActionModal');
+      alert("✅ تم تنفيذ وتطبيق العقوبة بنجاح وإشعار الحساب.");
+    };
+
+    window.forgiveAccountViolations = async (role, phone) => {
+      if (!confirm("هل تريد تصفير مخالفات هذا الحساب ومسامحته وإعادة تفعيله؟")) return;
+      const col = role === 'captain' ? 'captains' : 'users';
+      const resetPayload = role === 'captain'
+        ? { skipCount: 0, penaltyStatus: null, penaltyReason: null, status: 'active' }
+        : { cancelCount: 0, penaltyStatus: null, penaltyReason: null, status: 'active', unpaidFine: 0 };
+      await updateDoc(doc(db, col, phone), resetPayload);
+      alert("✅ تم تصفير السجل بنجاح.");
+    };
+
+    // 5. إدارة الكباتن وتدقيق الوثائق الـ 8 وقفل الديون
+    onSnapshot(collection(db, "captains"), snap => {
+      captainsCache = [];
+      let pending = 0, locked = 0;
+
+      snap.forEach(d => {
+        const c = d.data();
+        c.phone = d.id;
+        const debt = c.companyDebt || 0;
+
+        if (debt >= 10000 && (c.walletBalance || 0) <= 0 && c.status !== "debt_locked" && c.status !== "blocked") {
+          updateDoc(doc(db, "captains", c.phone), { status: "debt_locked", isOnline: false });
+          c.status = "debt_locked";
+        }
+        if (c.status === "debt_locked" || c.status === "blocked") locked++;
+        if (c.status === "pending_approval") pending++;
+        captainsCache.push(c);
+      });
+
+      document.getElementById("badgePendingCaps").innerText = pending;
+      document.getElementById("lblPendingCapsCount").innerText = pending;
+      document.getElementById("lblLockedDebtsCount").innerText = locked;
+      renderCaptainsDeck(currentCapFilter);
+    });
+
+    window.filterCaptains = f => { currentCapFilter = f; renderCaptainsDeck(f); };
+
+    function renderCaptainsDeck(filter) {
+      const grid = document.getElementById("captainsDeckGrid");
+      let list = captainsCache;
+      if (filter === "debt_locked") list = captainsCache.filter(c => c.status === "debt_locked" || c.status === "blocked");
+      if (filter === "pending_approval") list = captainsCache.filter(c => c.status === "pending_approval");
+
+      grid.innerHTML = list.map(c => {
+        const debt = c.companyDebt || 0;
+        const isLocked = c.status === "debt_locked" || c.status === "blocked";
+        const isPending = c.status === "pending_approval";
+
+        return `<div class="cap-card ${isLocked ? 'debt-danger' : ''}">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${c.avatarUrl || 'logo.png'}" class="cap-avatar" onerror="this.src='logo.png'">
+              <div>
+                <h4 style="font-size:14.5px; font-weight:950;">${c.name || "بدون اسم"}</h4>
+                <span style="font-size:12px; color:var(--muted);">📱 ${c.phone}</span>
+              </div>
+            </div>
+            <div>
+              ${c.status === "blocked" ? '<span class="pill-badge badge-red">محظور يدوي</span>' :
+                c.status === "debt_locked" ? '<span class="pill-badge badge-red">🔒 مقفل (ديون)</span>' :
+                isPending ? '<span class="pill-badge badge-amber">⏳ تدقيق</span>' :
+                '<span class="pill-badge" style="background:rgba(16,185,129,0.2);color:var(--success);">✓ نشط</span>'}
+            </div>
+          </div>
+
+          <div class="debt-badge-row">
+            <span>مستحقات المنصة:</span>
+            <b style="font-size:14px;">${debt.toLocaleString()} د.ع</b>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03); border-radius:14px; padding:10px 14px; font-size:12px; border:1px solid var(--border-glass); display:flex; justify-content:space-between;">
+            <span>🚗 <b>${c.carModel || '--'}</b> (${c.carPlate || '--'})</span>
+            <span>⭐ ${(c.rating || 5.0).toFixed(1)}</span>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:2px;">
+            <button class="btn btn-ghost" style="flex:1;" onclick="openInspectorModal('${c.phone}', '${c.name}', '${c.carModel}')">👁️ الوثائق الـ 8</button>
+            ${c.status === 'blocked' ?
+              `<button class="btn btn-success" style="flex:1;" onclick="toggleCaptainBlock('${c.phone}', 'active')">فك الحظر</button>` :
+              `<button class="btn btn-danger" style="flex:1;" onclick="toggleCaptainBlock('${c.phone}', 'blocked')">قفل / حظر</button>`
+            }
+          </div>
+        </div>`;
+      }).join("") || "<div style='text-align:center; color:var(--muted); grid-column:1/-1;'>لا توجد بيانات لهذا الفرز.</div>";
+    }
+
+    window.toggleCaptainBlock = async (phone, st) => {
+      const isBlock = st === 'blocked';
+      await updateDoc(doc(db, "captains", phone), { status: st, isOnline: !isBlock });
+      alert(isBlock ? "🔒 تم حظر الكابتن وفصله عن الرادار فوراً." : "✅ تم فك الحظر عن الكابتن.");
+    };
+
+    window.openInspectorModal = async (phone, name, car) => {
+      inspectedPhone = phone;
+      document.getElementById("inspectorDetails").innerHTML = `<b>الكابتن:</b> ${name} | <b>الهاتف:</b> ${phone} | <b>المركبة:</b> ${car}`;
+
+      ["vSanawaFront","vSanawaBack","vLicenseFront","vLicenseBack","vIdFront","vIdBack","vResFront","vResBack"].forEach(id => {
+        document.getElementById(id).src = "https://via.placeholder.com/150?text=جاري_التحميل";
+      });
+      document.getElementById("inspectorModal").style.display = "flex";
+
+      const snap = await getDoc(doc(db, "captains", phone));
+      if (snap.exists()) {
+        const d = snap.data().docs || {};
+        document.getElementById("vSanawaFront").src = d.sanawaFront || "";
+        document.getElementById("vSanawaBack").src = d.sanawaBack || "";
+        document.getElementById("vLicenseFront").src = d.licenseFront || "";
+        document.getElementById("vLicenseBack").src = d.licenseBack || "";
+        document.getElementById("vIdFront").src = d.idFront || "";
+        document.getElementById("vIdBack").src = d.idBack || "";
+        document.getElementById("vResFront").src = d.residenceFront || "";
+        document.getElementById("vResBack").src = d.residenceBack || "";
+      }
+    };
+
+    window.zoomImg = src => {
+      if (src && src.length > 30) {
+        const w = window.open("");
+        w.document.write(`<img src="${src}" style="max-width:100%;height:auto;display:block;margin:20px auto;border-radius:12px;">`);
+      }
+    };
+
+    window.approveCaptainByModal = async () => {
+      if (!inspectedPhone) return;
+      await updateDoc(doc(db, "captains", inspectedPhone), { status: "active" });
+      closeModalById("inspectorModal");
+      alert("✅ تم اعتماد وتفعيل حساب الكابتن بنجاح!");
+    };
+
+    window.freezeCaptainByModal = async () => {
+      if (!inspectedPhone) return;
+      await updateDoc(doc(db, "captains", inspectedPhone), { status: "blocked", isOnline: false });
+      closeModalById("inspectorModal");
+      alert("⚠️ تم تجميد حساب الكابتن وفصله.");
+    };
+
+    // 6. طلبات الشحن وتسديد الديون (ماستركارد)
+    onSnapshot(collection(db, "finance_logs"), snap => {
+      const tbody = document.getElementById("topupsTbody");
+      const pendingLogs = [];
+
+      snap.forEach(d => {
+        const item = d.data();
+        if (item.status === "pending_review") {
+          pendingLogs.push({ id: d.id, ...item });
+        }
+      });
+
+      document.getElementById("badgeTopupsCount").innerText = pendingLogs.length;
+      document.getElementById("tagFinancePendingCount").innerText = `${pendingLogs.length} طلبات معلقة`;
+
+      if (!pendingLogs.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--muted);">لا توجد طلبات شحن معلقة حالياً.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = pendingLogs.map(item => `
+        <tr>
+          <td><b>${item.captainName || "كابتن"}</b></td>
+          <td><code>${item.captainPhone}</code></td>
+          <td style="color:var(--cyan); font-weight:950;">${(item.amount || 0).toLocaleString()} د.ع</td>
+          <td><span class="pill-badge badge-amber">${item.type}</span></td>
+          <td>
+            ${item.receiptImg ? `<button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="zoomImg('${item.receiptImg}')">👁️ عرض الوصل</button>` : 'لا يوجد'}
+          </td>
+          <td>
+            <button class="btn btn-success" style="padding:4px 12px; font-size:11px;" onclick="approveFinanceTopup('${item.id}', '${item.captainPhone}', ${item.amount})">✓ تأكيد وتصفير الديون</button>
+            <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="rejectFinanceTopup('${item.id}')">✕ رفض</button>
+          </td>
+        </tr>
+      `).join("");
+    });
+
+    window.approveFinanceTopup = async (logId, captainPhone, amount) => {
+      if (!confirm(`هل أنت متأكد من وصول مبلغ (${amount.toLocaleString()} د.ع) وتصفير ديون الكابتن ${captainPhone} وفك قفله؟`)) return;
+
+      try {
+        await runTransaction(db, async tx => {
+          const capRef = doc(db, "captains", captainPhone);
+          const logRef = doc(db, "finance_logs", logId);
+          const capSnap = await tx.get(capRef);
+
+          if (capSnap.exists()) {
+            const capData = capSnap.data();
+            let currentDebt = capData.companyDebt || 0;
+            let currentWallet = capData.walletBalance || 0;
+
+            if (amount >= currentDebt) {
+              currentWallet += (amount - currentDebt);
+              currentDebt = 0;
+            } else {
+              currentDebt -= amount;
+            }
+
+            let newStatus = currentDebt < 10000 && capData.status === "debt_locked" ? "active" : capData.status;
+
+            tx.update(capRef, {
+              companyDebt: currentDebt,
+              walletBalance: currentWallet,
+              status: newStatus
+            });
+          }
+
+          tx.update(logRef, {
+            status: "approved",
+            approvedAt: serverTimestamp()
+          });
+        });
+
+        alert("✅ تم تأكيد الإيداع وتصفير ديون الكابتن وفك قفله بنجاح!");
+      } catch (err) {
+        alert("❌ خطأ أثناء المعالجة: " + err.message);
+      }
+    };
+
+    window.rejectFinanceTopup = async logId => {
+      if (confirm("هل تريد رفض طلب التحويل هذا؟")) {
+        await updateDoc(doc(db, "finance_logs", logId), { status: "rejected" });
+        alert("⚠️ تم رفض الطلب.");
+      }
+    };
+
+    // 7. الشكاوى والبلاغات الطارئة
+    onSnapshot(collection(db, "disputes"), snap => {
+      const tbody = document.getElementById("disputesTbody");
+      const list = [];
+
+      snap.forEach(d => {
+        const item = d.data();
+        if (item.status !== "resolved") {
+          list.push({ id: d.id, ...item });
+        }
+      });
+
+      document.getElementById("badgeDisputesCount").innerText = list.length;
+      document.getElementById("tagDisputesHeaderCount").innerText = `${list.length} بلاغات`;
+
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--muted);">لا توجد شكاوى أو بلاغات حالياً.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr>
+          <td><b>${item.reporterName || "مستخدم"}</b><br><small style="color:var(--muted);">${item.reporterPhone || ""}</small></td>
+          <td>${item.accusedName || "--"}<br><small style="color:var(--muted);">${item.accusedPhone || ""}</small></td>
+          <td><span class="pill-badge badge-amber">${item.issueType || "شكوى عامة"}</span></td>
+          <td style="max-width:200px;">${item.details || "--"}</td>
+          <td><code>#${(item.tripId || "").slice(0,5)}</code></td>
+          <td>
+            <a href="https://wa.me/964${(item.reporterPhone||'').replace(/^0/,'')}" target="_blank" class="btn btn-ghost" style="padding:4px 9px; font-size:11px;">واتساب 📲</a>
+            <button class="btn btn-success" style="padding:4px 9px; font-size:11px;" onclick="resolveDisputeRecord('${item.id}')">تم الحل ✓</button>
+          </td>
+        </tr>
+      `).join("");
+    });
+
+    window.resolveDisputeRecord = async id => {
+      await updateDoc(doc(db, "disputes", id), { status: "resolved", resolvedAt: serverTimestamp() });
+      alert("✅ تم إغلاق الشكوى وإشعار الطرفين بأنها حُلّت بنجاح.");
+    };
+
+    // 8. قاعدة بيانات الزبائن المعتمدة
+    onSnapshot(collection(db, "users"), snap => {
+      const tbody = document.getElementById("usersTbody");
+      const users = [];
+
+      snap.forEach(d => users.push({ phone: d.id, ...d.data() }));
+
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد زبائن مسجلين.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><b>${u.name || "زبون"}</b></td>
+          <td><code>${u.phone}</code></td>
+          <td>${u.totalTrips || 0} مشوار</td>
+          <td>${Number(u.totalKm || 0).toFixed(1)} كم</td>
+          <td><button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="giftVipCoupon('${u.phone}')">🎟️ إهداء كود VIP</button></td>
+        </tr>
+      `).join("");
+    });
+
+    window.giftVipCoupon = phone => {
+      document.getElementById("selectCouponTarget").value = "targeted";
+      onCouponScopeChange("targeted");
+      document.getElementById("txtTargetPhone").value = phone;
+      document.getElementById("txtCouponCode").value = `VIP${Math.floor(100 + Math.random() * 900)}`;
+      switchView("secCouponsManager", document.querySelectorAll(".nav-item")[10]);
+    };
+
+    window.onCouponScopeChange = v => {
+      document.getElementById("targetPhoneGroup").style.display = v === "targeted" ? "block" : "none";
+    };
+
+    window.deployCouponCode = async () => {
+      const code = document.getElementById("txtCouponCode").value.trim().toUpperCase();
+      const pct = Number(document.getElementById("txtCouponDiscount").value);
+      const scope = document.getElementById("selectCouponTarget").value;
+      const targetPhone = document.getElementById("txtTargetPhone").value.trim();
+
+      if (!code) { alert("أدخل رمز الكود"); return; }
+      if (scope === "targeted" && !targetPhone) { alert("أدخل رقم هاتف الزبون"); return; }
+
+      await setDoc(doc(db, "promo_codes", code), {
+        discountPercentage: pct, scope, targetPhone: scope === "targeted" ? targetPhone : null, isActive: true, createdAt: serverTimestamp()
+      });
+      alert(`✅ تم تفعيل ونشر الكود (${code}) بنجاح!`);
+      document.getElementById("txtCouponCode").value = "";
+    };
+
+    onSnapshot(collection(db, "promo_codes"), snap => {
+      const tbody = document.getElementById("couponsTbody");
+      const codes = [];
+
+      snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+
+      if (!codes.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد كودات فعالة.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = codes.map(c => `
+        <tr>
+          <td><b style="color:var(--cyan);">${c.id}</b></td>
+          <td><b>${c.discountPercentage || 15}%</b></td>
+          <td>${c.scope === 'targeted' ? `<span class="pill-badge badge-amber">مخصص لـ ${c.targetPhone}</span>` : '<span class="pill-badge" style="background:rgba(16,185,129,0.2);color:var(--success);">عام للجميع</span>'}</td>
+          <td><button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="deleteDoc(doc(db,'promo_codes','${c.id}'))">حذف</button></td>
+        </tr>
+      `).join("");
+    });
+
+    // 9. القواعد المالية ونطاق التغطية
+    onSnapshot(doc(db, "settings", "pricing_and_rules"), snap => {
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const r = d.coverageRadiusKm || 12;
+      document.getElementById("inCoverageRadiusKm").value = r;
+      if (mapInitialized) drawCoverageCircle(r);
+      if (d.commissionPercentage) document.getElementById("inCommissionPct").value = d.commissionPercentage;
+      if (d.basePrice) document.getElementById("inBasePrice").value = d.basePrice;
+      if (d.pricePerKm) document.getElementById("inKmRate").value = d.pricePerKm;
+    });
+
+    window.saveCoverageRadius = async () => {
+      const r = Number(document.getElementById("inCoverageRadiusKm").value);
+      await setDoc(doc(db, "settings", "pricing_and_rules"), { coverageRadiusKm: r }, { merge: true });
+      if (mapInitialized) drawCoverageCircle(r);
+      alert("✅ تم حفظ وتحديث نطاق التغطية بنجاح!");
+    };
+
+    window.savePricingAlgorithm = async () => {
+      await setDoc(doc(db, "settings", "pricing_and_rules"), {
+        commissionPercentage: Number(document.getElementById("inCommissionPct").value),
+        basePrice: Number(document.getElementById("inBasePrice").value),
+        pricePerKm: Number(document.getElementById("inKmRate").value)
+      }, { merge: true });
+      alert("✅ تم حفظ وتطبيق خوارزمية التسعير الجديدة على المنظومة بنجاح!");
+    };
+
+    window.exportDataExcel = () => {
+      if (!exportTrips.length) { alert("لا توجد بيانات لتصديرها."); return; }
+      let csv = "data:text/csv;charset=utf-8,\uFEFFTripID,Captain,User,Fare,DistanceKM,Status\n";
+      exportTrips.forEach(t => {
+        csv += `"${t.id}","${t.captainName || ''}","${t.userName || ''}","${t.fare || 0}","${t.distanceKm || 0}","${t.status || ''}"\n`;
+      });
+      const a = document.createElement("a");
+      a.href = encodeURI(csv);
+      a.download = `wasalni_report_${Date.now()}.csv`;
+      a.click();
+    };
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+}
+  </script>
+</body>
+</html>
